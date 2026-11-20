@@ -1,0 +1,17 @@
+
+static MachineBasicBlock* emit_sll_test_simple_sll(MachineInstr& MI, MachineBasicBlock* MBBOrig) {
+
+MachineFunction* MF  = MBBOrig->getParent();
+DebugLoc DL  = MI.getDebugLoc();
+const TargetInstrInfo* TII = MF->getSubtarget().getInstrInfo();
+MachineRegisterInfo& MRI = MF->getRegInfo();
+Register RDest = MI.getOperand(0).getReg();
+Register IN1 = MI.getOperand(1).getReg();
+Register IN2 = MI.getOperand(2).getReg();
+
+
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::SLLI), RDest).addReg(IN1).addImm(0);
+
+MI.eraseFromParent();
+return MBBOrig;
+}

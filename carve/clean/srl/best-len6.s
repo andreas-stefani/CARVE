@@ -1,0 +1,14 @@
+  andi x4, x3, 31          
+  sra  x5, x2, x4          
+  addi x6, x0, 32
+  sub  x6, x6, x4          
+  addi x7, x0, 1
+  sll  x7, x7, x6          
+  addi x7, x7, -1          
+  and  x5, x5, x7          
+  sltu x6, x0, x4          
+sub x6, x0, x6
+  and  x5, x5, x6          
+xori x6, x6, -1
+  and  x1, x2, x6          
+  or   x1, x1, x5          

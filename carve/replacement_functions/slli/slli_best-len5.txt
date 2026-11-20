@@ -1,0 +1,25 @@
+
+static MachineBasicBlock* emit_slli_best_len5(MachineInstr& MI, MachineBasicBlock* MBBOrig) {
+
+MachineFunction* MF  = MBBOrig->getParent();
+DebugLoc DL  = MI.getDebugLoc();
+const TargetInstrInfo* TII = MF->getSubtarget().getInstrInfo();
+MachineRegisterInfo& MRI = MF->getRegInfo();
+Register RDest = MI.getOperand(0).getReg();
+Register IN1 = MI.getOperand(1).getReg();
+int64_t Imm = MI.getOperand(2).getImm();
+
+
+Register T1 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::ADD), T1).addReg(IN1).addReg(IN1);
+Register T2 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::ADD), T2).addReg(T1).addReg(T1);
+Register T3 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::ADD), T3).addReg(T2).addReg(T2);
+Register T4 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::ADD), T4).addReg(T3).addReg(T3);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::ADD), RDest).addReg(T4).addReg(T4);
+
+MI.eraseFromParent();
+return MBBOrig;
+}

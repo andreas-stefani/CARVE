@@ -1,0 +1,21 @@
+
+static MachineBasicBlock* emit_ori_best_len3(MachineInstr& MI, MachineBasicBlock* MBBOrig) {
+
+MachineFunction* MF  = MBBOrig->getParent();
+DebugLoc DL  = MI.getDebugLoc();
+const TargetInstrInfo* TII = MF->getSubtarget().getInstrInfo();
+MachineRegisterInfo& MRI = MF->getRegInfo();
+Register RDest = MI.getOperand(0).getReg();
+Register IN1 = MI.getOperand(1).getReg();
+int64_t Imm = MI.getOperand(2).getImm();
+
+
+Register T1 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::ANDI), T1).addReg(IN1).addImm(Imm);
+Register T2 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::XOR), T2).addReg(IN1).addReg(T1);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::XORI), RDest).addReg(T2).addImm(Imm);
+
+MI.eraseFromParent();
+return MBBOrig;
+}

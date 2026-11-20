@@ -1,0 +1,63 @@
+
+static MachineBasicBlock* emit_mulhsu_best_len25(MachineInstr& MI, MachineBasicBlock* MBBOrig) {
+
+MachineFunction* MF  = MBBOrig->getParent();
+DebugLoc DL  = MI.getDebugLoc();
+const TargetInstrInfo* TII = MF->getSubtarget().getInstrInfo();
+MachineRegisterInfo& MRI = MF->getRegInfo();
+Register RDest = MI.getOperand(0).getReg();
+Register IN1 = MI.getOperand(1).getReg();
+Register IN2 = MI.getOperand(2).getReg();
+
+
+Register T1 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::LUI), T1).addImm(16);
+Register T2 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::ADDI), T2).addReg(T1).addImm(-1);
+Register T3 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::AND), T3).addReg(IN1).addReg(T2);
+Register T4 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::SRLI), T4).addReg(IN1).addImm(16);
+Register T5 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::AND), T5).addReg(IN2).addReg(T2);
+Register T6 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::SRLI), T6).addReg(IN2).addImm(16);
+Register T7 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::MUL), T7).addReg(T3).addReg(T5);
+Register T8 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::MUL), T8).addReg(T3).addReg(T6);
+Register T9 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::MUL), T9).addReg(T4).addReg(T5);
+Register T10 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::MUL), T10).addReg(T4).addReg(T6);
+Register T11 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::AND), T11).addReg(T8).addReg(T2);
+Register T12 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::AND), T12).addReg(T9).addReg(T2);
+Register T13 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::SRLI), T13).addReg(T7).addImm(16);
+Register T14 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::ADD), T14).addReg(T11).addReg(T12);
+Register T15 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::ADD), T15).addReg(T14).addReg(T13);
+Register T16 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::SRLI), T16).addReg(T15).addImm(16);
+Register T17 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::SRLI), T17).addReg(T8).addImm(16);
+Register T18 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::SRLI), T18).addReg(T9).addImm(16);
+Register T19 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::ADD), T19).addReg(T10).addReg(T17);
+Register T20 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::ADD), T20).addReg(T19).addReg(T18);
+Register T21 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::ADD), T21).addReg(T20).addReg(T16);
+Register T22 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::SRAI), T22).addReg(IN1).addImm(31);
+Register T23 = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::AND), T23).addReg(T22).addReg(IN2);
+BuildMI(*MBBOrig, MI, DL, TII->get(RISCV::SUB), RDest).addReg(T21).addReg(T23);
+
+MI.eraseFromParent();
+return MBBOrig;
+}
